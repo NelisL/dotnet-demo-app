@@ -1,47 +1,26 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/dotnet/sdk:10.0'
-            args '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp'
-        }
-    }
-    stages {
-        stage('Test') {
-            steps {
-                sh 'dotnet test TodoApp.Tests'
-            }
-        }
-    }
-}pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/dotnet/sdk:10.0' 
-            args '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp -e NUGET_PACKAGES=/tmp/.nuget/packages'
-        }
-    }
+    agent any
 
     stages {
-        stage('Restore') {
+        stage('Preparation') {
             steps {
-                sh 'dotnet restore dotnet-demo-app/TodoApp.Tests'
+                catchError {
+                    sh 'docker stop todoapp'
+                    sh 'docker rm todoapp'
+                    sh 'docker stop todoappdb'
+                    sh 'docker rm todoappdb'
+                }
             }
         }
-
         stage('Test') {
             steps {
-                sh '''
-                    dotnet test dotnet-demo-app/TodoApp.Tests \
-                      --no-restore \
-                      --logger "trx;LogFileName=results.trx" \
-                      --results-directory TestResults
-                '''
+                build job: 'test-dotnet-demo-app'
             }
         }
-    }
-
-    post {
-        always {
-            junit allowEmptyResults: true, testResultsFileRegex: 'TestResults/*.trx'
+        stage('Build') {
+            steps {
+                build job: 'dotnet-demo-app'
+            }
         }
     }
 }
