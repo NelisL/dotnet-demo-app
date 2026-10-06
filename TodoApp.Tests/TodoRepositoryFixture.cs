@@ -12,8 +12,9 @@ public class TodoRepositoryFixture
     public TodoRepositoryFixture()
     {
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
+        .AddJsonFile("appsettings.json")
+        .AddEnvironmentVariables()
+        .Build();
 
         _connectionString = configuration.GetConnectionString("TodoDb")
             ?? throw new InvalidOperationException("Test connection string not configured.");
