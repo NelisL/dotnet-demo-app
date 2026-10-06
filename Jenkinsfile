@@ -1,6 +1,20 @@
 pipeline {
     agent {
         docker {
+            image 'mcr.microsoft.com/dotnet/sdk:10.0'
+            args '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp'
+        }
+    }
+    stages {
+        stage('Test') {
+            steps {
+                sh 'dotnet test TodoApp.Tests'
+            }
+        }
+    }
+}pipeline {
+    agent {
+        docker {
             image 'mcr.microsoft.com/dotnet/sdk:10.0' 
             args '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp -e NUGET_PACKAGES=/tmp/.nuget/packages'
         }
